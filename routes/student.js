@@ -4,6 +4,8 @@ const router = express.Router();
 
 router.post("/add", studentController.addStudent);
 
-router.get("/find",studentController.findStudent);
+router.get("/find", studentController.findStudent);
 
-module.exports=router;
+router.get("/history", studentController.getBorrowHistory);
+
+module.exports = router;

@@ -1,5 +1,6 @@
 const Book = require("../model/book");
 const Borrow = require("../model/borrow");
+const Student = require("../model/student");
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -65,11 +66,12 @@ exports.borrowBook = async (req, res, next) => {
   try {
     const bookId = req.body.book_id;
     const studentId = req.body.student_id;
-
+    const student = await Student.findByPk(studentId);
     const borrow = await Borrow.create({
       student_id: studentId,
       book_id: bookId,
     });
+    borrow.setStudent(student);
     res.status(200).json({
       message: "Book Issued!",
       issue_details: borrow,

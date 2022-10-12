@@ -1,5 +1,5 @@
-
 const Student = require("../model/student");
+const Borrow = require("../model/borrow");
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -55,6 +55,24 @@ exports.addStudent = async (req, res, next) => {
     res.status(200).json({
       message: "Student already created",
       student: student,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
+exports.getBorrowHistory = async (req, res, next) => {
+  const studentId = req.body.id;
+  try {
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found",
+      });
+    }
+    const history = await student.getBorrows();
+    res.status(200).json({
+      history: history,
     });
   } catch (error) {
     throwError(error, next);
