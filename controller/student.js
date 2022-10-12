@@ -1,5 +1,6 @@
 const Student = require("../model/student");
 const Borrow = require("../model/borrow");
+const { validationResult } = require("express-validator");
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -8,7 +9,18 @@ const throwError = (err, next) => {
   next(err);
 };
 
+const checkBodyData = (req, next) => {
+  const errors = validationResult(req).errors;
+  if (errors.length !== 0) {
+    const error = new Error("Validation failed,entered data is incorrect");
+    error.statusCode = 422;
+    error.data = errors;
+    next(error);
+  }
+};
+
 exports.findStudent = async (req, res, next) => {
+  checkBodyData(req, next);
   const id = req.body.id;
   try {
     const student = await Student.findByPk(id);
@@ -27,6 +39,7 @@ exports.findStudent = async (req, res, next) => {
 };
 
 exports.addStudent = async (req, res, next) => {
+  checkBodyData(req, next);
   const enrollment = req.body.id;
   const name = req.body.name;
   const branch = req.body.branch;
@@ -62,6 +75,7 @@ exports.addStudent = async (req, res, next) => {
 };
 
 exports.getBorrowHistory = async (req, res, next) => {
+  checkBodyData(req, next);
   const studentId = req.body.id;
   try {
     const student = await Student.findByPk(studentId);

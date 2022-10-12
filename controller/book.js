@@ -1,12 +1,23 @@
 const Book = require("../model/book");
 const Borrow = require("../model/borrow");
 const Student = require("../model/student");
+const { validationResult } = require("express-validator");
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
     err.statusCode = 500;
   }
   next(err);
+};
+
+const checkBodyData = (req, next) => {
+  const errors = validationResult(req).errors;
+  if (errors.length !== 0) {
+    const error = new Error("Validation failed,entered data is incorrect");
+    error.statusCode = 422;
+    error.data = errors;
+    next(error);
+  }
 };
 
 exports.findAllBooks = async (req, res, next) => {
@@ -21,6 +32,7 @@ exports.findAllBooks = async (req, res, next) => {
 };
 
 exports.findBook = async (req, res, next) => {
+  checkBodyData(req, next);
   try {
     const book = await Book.findOne({
       where: {
@@ -41,6 +53,7 @@ exports.findBook = async (req, res, next) => {
 };
 
 exports.addBook = async (req, res, next) => {
+  checkBodyData(req, next);
   try {
     const name = req.body.name;
     const description = req.body.description;
@@ -63,6 +76,7 @@ exports.addBook = async (req, res, next) => {
 };
 
 exports.borrowBook = async (req, res, next) => {
+  checkBodyData(req, next);
   try {
     const bookId = req.body.book_id;
     const studentId = req.body.student_id;
@@ -82,6 +96,7 @@ exports.borrowBook = async (req, res, next) => {
 };
 
 exports.returnBook = async (req, res, next) => {
+  checkBodyData(req, next);
   const bookId = req.body.book_id;
   const studentId = req.body.student_id;
   try {
