@@ -81,9 +81,32 @@ exports.borrowBook = async (req, res, next) => {
     const bookId = req.body.book_id;
     const studentId = req.body.student_id;
     const student = await Student.findByPk(studentId);
+    const book = await Book.findByPk(bookId);
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found!",
+      });
+    }
     if (!student) {
       return res.status(404).json({
         message: "Student not found!",
+      });
+    }
+
+    const result = await Book.update(
+      {
+        available: false,
+      },
+      {
+        where: {
+          id: bookId,
+        },
+      }
+    );
+    if (result[0] !== 1) {
+      return res.status(200).json({
+        message: "Book issue failed!",
+        result: result,
       });
     }
     const borrow = await Borrow.create({
@@ -106,6 +129,16 @@ exports.returnBook = async (req, res, next) => {
   const studentId = req.body.student_id;
   try {
     const date = new Date();
+    const bookUpdate = await Book.update(
+      {
+        available: true,
+      },
+      {
+        where: {
+          id: bookId,
+        },
+      }
+    );
     const result = await Borrow.update(
       {
         return_date: date,
@@ -117,7 +150,7 @@ exports.returnBook = async (req, res, next) => {
         },
       }
     );
-    if (result[0] === 1) {
+    if (result[0] === 1 && bookUpdate[0] === 1) {
       return res.status(200).json({
         message: "Book returned!",
         result: result,
