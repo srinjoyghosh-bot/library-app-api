@@ -1,5 +1,6 @@
 const express = require("express");
 const studentController = require("../controller/student");
+const { body } = require("express-validator");
 const router = express.Router();
 
 router.post(

@@ -81,6 +81,11 @@ exports.borrowBook = async (req, res, next) => {
     const bookId = req.body.book_id;
     const studentId = req.body.student_id;
     const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found!",
+      });
+    }
     const borrow = await Borrow.create({
       student_id: studentId,
       book_id: bookId,
