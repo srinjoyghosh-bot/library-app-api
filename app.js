@@ -5,6 +5,10 @@ const Student = require("./model/student");
 const Borrow = require("./model/borrow");
 const studentRoutes = require("./routes/student");
 const bookRoutes = require("./routes/book");
+const dotenv=require("dotenv")
+
+dotenv.config();
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -40,7 +44,7 @@ Borrow.belongsTo(Student);
 sequelize
   .sync()
   .then((result) => {
-    app.listen(8080);
+    app.listen(process.env.PORT || 8080);
   })
   .catch((error) => {
     console.log(error);

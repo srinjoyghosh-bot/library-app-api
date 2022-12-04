@@ -9,7 +9,8 @@ const Sequelize = require("sequelize");
 //   host: "sql.freedb.tech",
   
 // });
-const sequelize = new Sequelize("BYWY12SiJV", "BYWY12SiJV", "rGWA59ah3o", {
+require('dotenv').config()
+const sequelize = new Sequelize("BYWY12SiJV", process.env.DB_USER, process.env.DB_PASSWORD, {
   dialect: "mysql",
   host: "remotemysql.com",
   
