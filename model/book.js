@@ -11,6 +11,7 @@ const Book = sequelize.define("book", {
   name: Sequelize.STRING,
   description: Sequelize.STRING,
   publisher:Sequelize.STRING,
+  author:Sequelize.STRING,
   image_url:{
     type:Sequelize.STRING,
     allowNull:true,

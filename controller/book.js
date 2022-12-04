@@ -58,11 +58,13 @@ exports.addBook = async (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     const publisher = req.body.publisher;
+    const author = req.body.author;
     const imageUrl = req.body.image;
     const book = await Book.create({
       name: name,
       description: description,
       publisher: publisher,
+      author: author,
       image_url: imageUrl,
       available: true,
     });
