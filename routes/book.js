@@ -35,4 +35,7 @@ router.get(
   [body("id").trim().not().isEmpty().isDecimal()],
   bookController.findBook
 );
+router.get("/find-by-name", bookController.findBookByName);
+router.delete("/delete", bookController.deleteBook);
+router.put("/toggle-availability", bookController.toggleAvailability);
 module.exports = router;

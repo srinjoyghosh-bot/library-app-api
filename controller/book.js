@@ -2,6 +2,9 @@ const Book = require("../model/book");
 const Borrow = require("../model/borrow");
 const Student = require("../model/student");
 const { validationResult } = require("express-validator");
+const { Op } = require("sequelize");
+
+// const Op = Sequelize.Op;
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -52,6 +55,30 @@ exports.findBook = async (req, res, next) => {
   }
 };
 
+exports.findBookByName = async (req, res, next) => {
+  checkBodyData(req, next);
+  console.log(req.query.name);
+  try {
+    const books = await Book.findAll({
+      where: {
+        name: {
+          [Op.like]: "%" + req.query.name + "%",
+        },
+      },
+    });
+    if (!books) {
+      return res.status(404).json({
+        message: "No book found",
+      });
+    }
+    res.status(200).json({
+      books: books,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
 exports.addBook = async (req, res, next) => {
   checkBodyData(req, next);
   try {
@@ -72,6 +99,34 @@ exports.addBook = async (req, res, next) => {
       message: "Book added !",
       book: book,
     });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
+exports.deleteBook = async (req, res, next) => {
+  const id = req.query.id;
+  if (!id) {
+    return res.status(401).json({
+      message: "Please provide a book id",
+    });
+  }
+
+  try {
+    const rowsDeleted = await Book.destroy({
+      where: {
+        id: id,
+      },
+    });
+    if (rowsDeleted === 1) {
+      return res.status(200).json({
+        message: "Book deleted!",
+      });
+    } else {
+      return res.status(404).json({
+        message: "No book found!",
+      });
+    }
   } catch (error) {
     throwError(error, next);
   }
@@ -119,6 +174,31 @@ exports.borrowBook = async (req, res, next) => {
     res.status(200).json({
       message: "Book Issued!",
       issue_details: borrow,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
+exports.toggleAvailability = async (req, res, next) => {
+  const id = req.query.id;
+  if (!id) {
+    return res.status(401).json({
+      message: "Please provide a book id",
+    });
+  }
+  try {
+    const book = await Book.findByPk(id);
+    if (!book) {
+      return res.status(404).json({
+        message: "No book found",
+      });
+    }
+    book.available = !book.available;
+    const result = await book.save();
+    return res.status(200).json({
+      message: "Book saved!",
+      result: result,
     });
   } catch (error) {
     throwError(error, next);
