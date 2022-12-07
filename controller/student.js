@@ -73,11 +73,13 @@ exports.addStudent = async (req, res, next) => {
     if (created) {
       return res.status(200).json({
         message: "Student created",
+        created:true,
         student: student,
       });
     }
     res.status(200).json({
       message: "Student already created",
+      created:false,
       student: student,
     });
   } catch (error) {
