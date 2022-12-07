@@ -10,6 +10,7 @@ router.post(
     body("name").trim().not().isEmpty(),
     body("description").trim().not().isEmpty(),
     body("publisher").trim().not().isEmpty(),
+    body("author").trim().not().isEmpty(),
   ],
   bookController.addBook
 );

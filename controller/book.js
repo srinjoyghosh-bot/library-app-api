@@ -35,7 +35,6 @@ exports.findAllBooks = async (req, res, next) => {
 };
 
 exports.findBook = async (req, res, next) => {
-  // checkBodyData(req, next);
   try {
     const book = await Book.findOne({
       where: {
@@ -56,8 +55,6 @@ exports.findBook = async (req, res, next) => {
 };
 
 exports.findBookByName = async (req, res, next) => {
-  checkBodyData(req, next);
-  console.log(req.query.name);
   try {
     const books = await Book.findAll({
       where: {

@@ -19,6 +19,17 @@ const checkBodyData = (req, next) => {
   }
 };
 
+exports.getAllStudents = async (req, res, next) => {
+  try {
+    const students = await Student.findAll();
+    return res.status(200).json({
+      students: students,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
 exports.findStudent = async (req, res, next) => {
   checkBodyData(req, next);
   const id = req.body.id;
@@ -75,8 +86,13 @@ exports.addStudent = async (req, res, next) => {
 };
 
 exports.getBorrowHistory = async (req, res, next) => {
-  checkBodyData(req, next);
-  const studentId = req.body.id;
+  // checkBodyData(req, next);
+  const studentId = req.query.id;
+  if (!id) {
+    return res.status(401).json({
+      message: "please provide an id",
+    });
+  }
   try {
     const student = await Student.findByPk(studentId);
     if (!student) {

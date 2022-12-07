@@ -15,6 +15,8 @@ router.post(
   studentController.addStudent
 );
 
+router.get("/get", studentController.getAllStudents);
+
 router.get(
   "/find",
   [body("id").trim().not().isEmpty().isDecimal()],
