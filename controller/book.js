@@ -39,7 +39,7 @@ exports.findBook = async (req, res, next) => {
   try {
     const book = await Book.findOne({
       where: {
-        id: req.body.id,
+        id: req.query.id,
       },
     });
     if (!book) {
