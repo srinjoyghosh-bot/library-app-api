@@ -25,7 +25,7 @@ router.get(
 
 router.get(
   "/history",
-  [body("id").trim().not().isEmpty().isDecimal()],
+  // [body("id").trim().not().isEmpty().isDecimal()],
   studentController.getBorrowHistory
 );
 

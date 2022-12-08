@@ -277,6 +277,7 @@ exports.returnBook = async (req, res, next) => {
           student_id: studentId,
           book_id: bookId,
         },
+        order: [ [ 'id', 'DESC' ]],
       }
     );
     if (result[0] !== 1) {

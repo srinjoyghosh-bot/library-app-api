@@ -90,7 +90,7 @@ exports.addStudent = async (req, res, next) => {
 exports.getBorrowHistory = async (req, res, next) => {
   // checkBodyData(req, next);
   const studentId = req.query.id;
-  if (!id) {
+  if (!studentId) {
     return res.status(401).json({
       message: "please provide an id",
     });
