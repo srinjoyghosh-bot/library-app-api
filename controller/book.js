@@ -146,7 +146,21 @@ exports.borrowBook = async (req, res, next) => {
         message: "Student not found!",
       });
     }
-
+    // const check = await Borrow.findOne({
+    //   where: {
+    //     book_id: bookId,
+    //   },
+    // });
+    // if (check !== null && check.return_date === null) {
+    //   return res.status(401).json({
+    //     message: "Book already borrowed",
+    //   });
+    // }
+    if (!book.available) {
+      return res.status(401).json({
+        message: "Book not available",
+      });
+    }
     const result = await Book.update(
       {
         available: false,
@@ -158,7 +172,7 @@ exports.borrowBook = async (req, res, next) => {
       }
     );
     if (result[0] !== 1) {
-      return res.status(200).json({
+      return res.status(401).json({
         message: "Book issue failed!",
         result: result,
       });
@@ -208,6 +222,37 @@ exports.returnBook = async (req, res, next) => {
   const studentId = req.body.student_id;
   try {
     const date = new Date();
+    const book = await Book.findByPk(bookId);
+    const student = await Student.findByPk(studentId);
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found!",
+      });
+    }
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found!",
+      });
+    }
+
+    if (book.available) {
+      return res.status(401).json({
+        message: "Book was not borrowed",
+      });
+    }
+    const check = await Borrow.findOne({
+      where: {
+        book_id: bookId,
+        student_id: studentId,
+      },
+      order: [ [ 'id', 'DESC' ]],
+    });
+    if (check === null || check.return_date !== null) {
+      return res.status(401).json({
+        message: "Book was not available for issue",
+      });
+    }
+
     const bookUpdate = await Book.update(
       {
         available: true,
@@ -218,6 +263,11 @@ exports.returnBook = async (req, res, next) => {
         },
       }
     );
+    if (bookUpdate[0] !== 1) {
+      return res.status(401).json({
+        message: "Book return failed!",
+      });
+    }
     const result = await Borrow.update(
       {
         return_date: date,
@@ -229,14 +279,24 @@ exports.returnBook = async (req, res, next) => {
         },
       }
     );
-    if (result[0] === 1 && bookUpdate[0] === 1) {
-      return res.status(200).json({
-        message: "Book returned!",
-        result: result,
+    if (result[0] !== 1) {
+      const bookUpdate = await Book.update(
+        {
+          available: false,
+        },
+        {
+          where: {
+            id: bookId,
+          },
+        }
+      );
+      return res.status(401).json({
+        message: "Book return failed!",
       });
     }
-    res.status(401).json({
-      message: "Book return failed!",
+    res.status(200).json({
+      message: "Book returned!",
+      result: result,
     });
   } catch (error) {
     throwError(error, next);
