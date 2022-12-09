@@ -1,6 +1,10 @@
 const Student = require("../model/student");
 const Borrow = require("../model/borrow");
 const { validationResult } = require("express-validator");
+const differenceInDays = require("date-fns/differenceInDays");
+const { fi } = require("date-fns/locale");
+
+const finePerDay = 10;
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -73,13 +77,13 @@ exports.addStudent = async (req, res, next) => {
     if (created) {
       return res.status(200).json({
         message: "Student created",
-        created:true,
+        created: true,
         student: student,
       });
     }
     res.status(200).json({
       message: "Student already created",
-      created:false,
+      created: false,
       student: student,
     });
   } catch (error) {
@@ -103,7 +107,20 @@ exports.getBorrowHistory = async (req, res, next) => {
       });
     }
     const history = await student.getBorrows();
+    let fine = 0;
+    history.forEach((borrow) => {
+      if (borrow.return_date) {
+        let diffInDays = differenceInDays(
+          new Date(borrow.return_date),
+          new Date(borrow.createdAt)
+        );
+        if (diffInDays > 7) {
+          fine += finePerDay * (diffInDays - 7);
+        }
+      }
+    });
     res.status(200).json({
+      fine: fine,
       history: history,
     });
   } catch (error) {
