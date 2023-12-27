@@ -7,12 +7,42 @@ router.post(
   "/add",
   [
     body("name").trim().not().isEmpty(),
+    body("id")
+      .trim()
+      .isNumeric()
+      .withMessage("Enrollment must be numeric")
+      .isLength({ max: 8, min: 8 })
+      .withMessage("Enrollment id must be of 8 digits"),
+    body("password")
+      .trim()
+      .isLength({
+        min: 8,
+      })
+      .withMessage("Password must be at least 8 characters"),
     body("branch").trim().not().isEmpty(),
     body("degree").trim().not().isEmpty(),
-    body("id").trim().not().isEmpty().isDecimal(),
     body("year").trim().not().isEmpty().isDecimal(),
   ],
   studentController.addStudent
+);
+
+router.post(
+  "/login",
+  [
+    body("enrollment")
+      .trim()
+      .isNumeric()
+      .withMessage("Enrollment must be numeric")
+      .isLength({ max: 8, min: 8 })
+      .withMessage("Enrollment id must be of 8 digits"),
+    body("password")
+      .trim()
+      .isLength({
+        min: 8,
+      })
+      .withMessage("Password must be at least 8 characters"),
+  ],
+  studentController.studentLogin
 );
 
 router.get("/get", studentController.getAllStudents);
