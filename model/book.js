@@ -1,23 +1,23 @@
-const Sequelize = require("sequelize");
+const {DataTypes} = require("sequelize");
 const sequelize = require("../util/database");
 
 const Book = sequelize.define("book", {
   id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
-  name: Sequelize.STRING,
-  description: Sequelize.STRING,
-  publisher:Sequelize.STRING,
-  author:Sequelize.STRING,
+  name: DataTypes.STRING,
+  description: DataTypes.STRING,
+  publisher:DataTypes.STRING,
+  author:DataTypes.STRING,
   image_url:{
-    type:Sequelize.STRING,
+    type:DataTypes.STRING,
     allowNull:true,
   },
   available: {
-    type: Sequelize.BOOLEAN,
+    type: DataTypes.BOOLEAN,
     default: true,
     allowNull:false,
   },

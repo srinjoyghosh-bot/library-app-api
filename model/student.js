@@ -1,18 +1,22 @@
-const Sequelize = require("sequelize");
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require("../util/database");
 
 const Student = sequelize.define("student", {
   enrollment_id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true,
   },
-  name: Sequelize.STRING,
-  branch: Sequelize.STRING,
-  year: Sequelize.INTEGER,
-  degree: Sequelize.STRING,
+  password:{
+    type:DataTypes.STRING,
+    allowNull:false,
+  },
+  name: DataTypes.STRING,
+  branch: DataTypes.STRING,
+  year: DataTypes.INTEGER,
+  degree: DataTypes.STRING,
   image_url: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true,
   },
 });

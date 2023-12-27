@@ -3,8 +3,11 @@ const Borrow = require("../model/borrow");
 const { validationResult } = require("express-validator");
 const differenceInDays = require("date-fns/differenceInDays");
 const { fi } = require("date-fns/locale");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const finePerDay = 10;
+const FINE_PER_DAY = 10;
+const SALT_ROUNDS = 12;
 
 const throwError = (err, next) => {
   if (!err.statusCode) {
@@ -56,17 +59,20 @@ exports.findStudent = async (req, res, next) => {
 exports.addStudent = async (req, res, next) => {
   checkBodyData(req, next);
   const enrollment = req.body.id;
+  const password = req.body.password;
   const name = req.body.name;
   const branch = req.body.branch;
   const degree = req.body.degree;
   const year = req.body.year;
   const image = req.body.image;
+  const hashedPw = await bcrypt.hash(password, SALT_ROUNDS);
   try {
     const [student, created] = await Student.findOrCreate({
       where: {
         enrollment_id: enrollment,
       },
       defaults: {
+        password: hashedPw,
         name: name,
         branch: branch,
         degree: degree,
@@ -81,13 +87,48 @@ exports.addStudent = async (req, res, next) => {
         student: student,
       });
     }
-    res.status(200).json({
-      message: "Student already created",
+    res.status(409).json({
+      error: "Conflict",
+      message: "Student already exists",
       created: false,
       student: student,
     });
   } catch (error) {
     throwError(error, next);
+  }
+};
+
+exports.studentLogin = async (req, res, next) => {
+  checkBodyData(req, next);
+  try {
+    const { enrollment, password } = req.body;
+    const student = await Student.findByPk(enrollment);
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found!",
+      });
+    }
+    const studentPw = student.password;
+    const isEqual = await bcrypt.compare(password, studentPw);
+    if (!isEqual) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "The provided password is incorrect. Access is denied.",
+      });
+    }
+    const token = jwt.sign(
+      {
+        enrollment: student.enrollment_id,
+      },
+      "mysecretsecret",
+      { expiresIn: "30d" }
+    );
+    res.status(200).json({
+      message:"Successfully logged in!",
+      token:token
+    })
+  } catch (error) {
+    throwError(error,next)
   }
 };
 
@@ -115,7 +156,7 @@ exports.getBorrowHistory = async (req, res, next) => {
           new Date(borrow.createdAt)
         );
         if (diffInDays > 7) {
-          fine += finePerDay * (diffInDays - 7);
+          fine += FINE_PER_DAY * (diffInDays - 7);
         }
       }
     });

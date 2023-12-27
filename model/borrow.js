@@ -1,25 +1,25 @@
-const Sequelize = require("sequelize");
+const {DataTypes} = require("sequelize");
 const sequelize = require("../util/database");
 
 const Borrow = sequelize.define(
   "borrow",
   {
     id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
       primaryKey: true,
     },
     student_id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     book_id: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     return_date: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },
