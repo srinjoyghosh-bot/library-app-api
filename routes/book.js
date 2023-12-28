@@ -16,6 +16,7 @@ router.post(
   isAdmin,
   bookController.addBook
 );
+
 router.post(
   "/issue",
   [
@@ -23,7 +24,7 @@ router.post(
     body("book_id").trim().not().isEmpty().isDecimal(),
   ],
   isAdmin,
-  bookController.borrowBook
+  bookController.issueBook
 );
 router.put(
   "/return",
