@@ -28,6 +28,12 @@ const checkBodyData = (req, next) => {
 };
 
 exports.getAllStudents = async (req, res, next) => {
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }  
   try {
     const students = await Student.findAll();
     return res.status(200).json({
@@ -40,8 +46,14 @@ exports.getAllStudents = async (req, res, next) => {
 
 exports.findStudent = async (req, res, next) => {
   checkBodyData(req, next);
-  const id = req.body.id;
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }    
   try {
+    const id = req.body.id;
     const student = await Student.findByPk(id);
     if (!student) {
       return res.status(404).json({

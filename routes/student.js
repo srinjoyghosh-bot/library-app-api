@@ -1,6 +1,7 @@
 const express = require("express");
 const studentController = require("../controller/student");
 const isAuth = require("../middleware/is_auth");
+const isAdmin = require("../middleware/is_admin");
 const { body } = require("express-validator");
 const router = express.Router();
 
@@ -46,11 +47,12 @@ router.post(
   studentController.studentLogin
 );
 
-router.get("/get", studentController.getAllStudents);
+router.get("/get", isAdmin, studentController.getAllStudents);
 
 router.get(
   "/find",
   [body("id").trim().not().isEmpty().isDecimal()],
+  isAdmin,
   studentController.findStudent
 );
 

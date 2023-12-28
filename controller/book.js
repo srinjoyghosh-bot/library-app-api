@@ -83,6 +83,12 @@ exports.findBookByName = async (req, res, next) => {
 
 exports.addBook = async (req, res, next) => {
   checkBodyData(req, next);
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }
   try {
     const name = req.body.name;
     const description = req.body.description;
@@ -110,10 +116,18 @@ exports.addBook = async (req, res, next) => {
 
 exports.deleteBook = async (req, res, next) => {
   const id = req.query.id;
+
   if (!id) {
     return res.status(401).json({
       message: "Please provide a book id",
     });
+  }
+
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
   }
 
   try {
@@ -138,6 +152,12 @@ exports.deleteBook = async (req, res, next) => {
 
 exports.issueBook = async (req, res, next) => {
   checkBodyData(req, next);
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }
   try {
     const borrowId = req.body.borrowId;
     const borrowRequest = await Borrow.findByPk(borrowId);
@@ -190,6 +210,12 @@ exports.issueBook = async (req, res, next) => {
 
 exports.rejectBookIssue = async (req, res, next) => {
   checkBodyData(req, next);
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }
   try {
     const borrowId = req.body.borrowId;
     const borrowRequest = await Borrow.findByPk(borrowId);
@@ -229,6 +255,12 @@ exports.toggleAvailability = async (req, res, next) => {
       message: "Please provide a book id",
     });
   }
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }
   try {
     const book = await Book.findByPk(id);
     if (!book) {
@@ -248,9 +280,15 @@ exports.toggleAvailability = async (req, res, next) => {
 };
 
 exports.returnBook = async (req, res, next) => {
-  checkBodyData(req, next);
-  const borrowId = req.body.borrowId;
+  checkBodyData(req, next);  
+  if(!req.isAdmin){
+    return res.status(401).json({
+      error:"Unauthenticated",
+      message:"Only admin can perform this action"
+    })
+  }  
   try {
+    const borrowId = req.body.borrowId;
     const date = new Date();
     const borrow = await Borrow.findByPk(borrowId);    
     
