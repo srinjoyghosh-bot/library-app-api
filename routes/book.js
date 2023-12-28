@@ -1,7 +1,8 @@
 const express = require("express");
 const bookController = require("../controller/book");
 const { body } = require("express-validator");
-
+const isAuth = require("../middleware/is_auth.js");
+const isAdmin = require("../middleware/is_admin.js");
 const router = express.Router();
 
 router.post(
@@ -12,6 +13,7 @@ router.post(
     body("publisher").trim().not().isEmpty(),
     body("author").trim().not().isEmpty(),
   ],
+  isAdmin,
   bookController.addBook
 );
 router.post(
@@ -20,6 +22,7 @@ router.post(
     body("student_id").trim().not().isEmpty().isDecimal(),
     body("book_id").trim().not().isEmpty().isDecimal(),
   ],
+  isAdmin,
   bookController.borrowBook
 );
 router.put(
@@ -28,6 +31,7 @@ router.put(
     body("student_id").trim().not().isEmpty().isDecimal(),
     body("book_id").trim().not().isEmpty().isDecimal(),
   ],
+  isAdmin,
   bookController.returnBook
 );
 router.get("/", bookController.findAllBooks);
@@ -37,6 +41,6 @@ router.get(
   bookController.findBook
 );
 router.get("/find-by-name", bookController.findBookByName);
-router.delete("/delete", bookController.deleteBook);
-router.put("/toggle-availability", bookController.toggleAvailability);
+router.delete("/delete", isAdmin, bookController.deleteBook);
+router.put("/toggle-availability", isAdmin, bookController.toggleAvailability);
 module.exports = router;

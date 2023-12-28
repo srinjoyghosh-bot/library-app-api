@@ -1,4 +1,5 @@
 const Student = require("../model/student");
+const Book = require("../model/book")
 const Borrow = require("../model/borrow");
 const { validationResult } = require("express-validator");
 const differenceInDays = require("date-fns/differenceInDays");
@@ -131,6 +132,58 @@ exports.studentLogin = async (req, res, next) => {
     throwError(error,next)
   }
 };
+
+exports.borrowRequest=async (req,res,next)=>{
+  checkBodyData(req, next);
+  try {
+    const bookId = req.body.book_id;
+    const studentId = req.body.student_id;
+    const student = await Student.findByPk(studentId);
+    const book = await Book.findByPk(bookId);
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found!",
+      });
+    }
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found!",
+      });
+    }    
+    if (!book.available) {
+      return res.status(401).json({
+        message: "Book not available",
+      });
+    }
+    const result = await Book.update(
+      {
+        available: false,
+      },
+      {
+        where: {
+          id: bookId,
+        },
+      }
+    );
+    if (result[0] !== 1) {
+      return res.status(401).json({
+        message: "Book issue failed!",
+        result: result,
+      });
+    }
+    const borrow = await Borrow.create({
+      student_id: studentId,
+      book_id: bookId,
+    });
+    borrow.setStudent(student);
+    res.status(200).json({
+      message: "Borrow request sent!",
+      issue_details: borrow,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+}
 
 exports.getBorrowHistory = async (req, res, next) => {
   // checkBodyData(req, next);

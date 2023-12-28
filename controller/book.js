@@ -1,3 +1,4 @@
+const generateUniqueId = require("generate-unique-id");
 const Book = require("../model/book");
 const Borrow = require("../model/borrow");
 const Student = require("../model/student");
@@ -21,6 +22,10 @@ const checkBodyData = (req, next) => {
     error.data = errors;
     next(error);
   }
+};
+
+const generateId = () => {
+  return generateUniqueId({ length: 6, includeSymbols: false });
 };
 
 exports.findAllBooks = async (req, res, next) => {
@@ -84,7 +89,9 @@ exports.addBook = async (req, res, next) => {
     const publisher = req.body.publisher;
     const author = req.body.author;
     const imageUrl = req.body.image;
+    const id = generateId();
     const book = await Book.create({
+      id: id,
       name: name,
       description: description,
       publisher: publisher,
@@ -129,36 +136,14 @@ exports.deleteBook = async (req, res, next) => {
   }
 };
 
-exports.borrowBook = async (req, res, next) => {
+exports.issueBook = async (req, res, next) => {
   checkBodyData(req, next);
   try {
-    const bookId = req.body.book_id;
-    const studentId = req.body.student_id;
-    const student = await Student.findByPk(studentId);
-    const book = await Book.findByPk(bookId);
-    if (!book) {
-      return res.status(404).json({
-        message: "Book not found!",
-      });
-    }
-    if (!student) {
-      return res.status(404).json({
-        message: "Student not found!",
-      });
-    }
-    // const check = await Borrow.findOne({
-    //   where: {
-    //     book_id: bookId,
-    //   },
-    // });
-    // if (check !== null && check.return_date === null) {
-    //   return res.status(401).json({
-    //     message: "Book already borrowed",
-    //   });
-    // }
-    if (!book.available) {
+    const borrowId = req.body.borrowId;
+    const borrowRequest = await Borrow.findByPk(borrowId);
+    if (!borrowRequest || borrowRequest.return_date !== null || borrowRequest.status!="pending") {
       return res.status(401).json({
-        message: "Book not available",
+        message: "Book was not available for issue",
       });
     }
     const result = await Book.update(
@@ -167,7 +152,7 @@ exports.borrowBook = async (req, res, next) => {
       },
       {
         where: {
-          id: bookId,
+          id: borrowRequest.book_id,
         },
       }
     );
@@ -177,14 +162,60 @@ exports.borrowBook = async (req, res, next) => {
         result: result,
       });
     }
-    const borrow = await Borrow.create({
-      student_id: studentId,
-      book_id: bookId,
-    });
-    borrow.setStudent(student);
+
+    result = await Borrow.update(
+      {
+        status: "approved",
+      },
+      {
+        where: {
+          id: borrowId,
+        },
+      }
+    );
+    if (result[0] !== 1) {
+      return res.status(401).json({
+        message: "Book issue failed!",
+        result: result,
+      });
+    }
+
     res.status(200).json({
       message: "Book Issued!",
-      issue_details: borrow,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
+
+exports.rejectBookIssue = async (req, res, next) => {
+  checkBodyData(req, next);
+  try {
+    const borrowId = req.body.borrowId;
+    const borrowRequest = await Borrow.findByPk(borrowId);
+    if (!borrowRequest || borrowRequest.return_date !== null || borrowRequest.status!="pending") {
+      return res.status(401).json({
+        message: "Book was not available for issue",
+      });
+    }
+    const result = await Borrow.update(
+      {
+        status: "rejected",
+      },
+      {
+        where: {
+          id: borrowId,
+        },
+      }
+    );
+    if (result[0] !== 1) {
+      return res.status(401).json({
+        message: "Book issue rejection failed!",
+        result: result,
+      });
+    }
+    res.status(200).json({
+      message: "Book Issue rejected!",
     });
   } catch (error) {
     throwError(error, next);
@@ -218,36 +249,12 @@ exports.toggleAvailability = async (req, res, next) => {
 
 exports.returnBook = async (req, res, next) => {
   checkBodyData(req, next);
-  const bookId = req.body.book_id;
-  const studentId = req.body.student_id;
+  const borrowId = req.body.borrowId;
   try {
     const date = new Date();
-    const book = await Book.findByPk(bookId);
-    const student = await Student.findByPk(studentId);
-    if (!book) {
-      return res.status(404).json({
-        message: "Book not found!",
-      });
-    }
-    if (!student) {
-      return res.status(404).json({
-        message: "Student not found!",
-      });
-    }
-
-    if (book.available) {
-      return res.status(401).json({
-        message: "Book was not borrowed",
-      });
-    }
-    const check = await Borrow.findOne({
-      where: {
-        book_id: bookId,
-        student_id: studentId,
-      },
-      order: [ [ 'id', 'DESC' ]],
-    });
-    if (check === null || check.return_date !== null) {
+    const borrow = await Borrow.findByPk(borrowId);    
+    
+    if (!borrow || borrow.return_date !== null || borrow.status!="approved") {
       return res.status(401).json({
         message: "Book was not available for issue",
       });
@@ -259,7 +266,7 @@ exports.returnBook = async (req, res, next) => {
       },
       {
         where: {
-          id: bookId,
+          id: borrow.book_id,
         },
       }
     );
@@ -274,10 +281,9 @@ exports.returnBook = async (req, res, next) => {
       },
       {
         where: {
-          student_id: studentId,
-          book_id: bookId,
+          id:borrowId
         },
-        order: [ [ 'id', 'DESC' ]],
+        order: [["id", "DESC"]],
       }
     );
     if (result[0] !== 1) {
@@ -287,7 +293,7 @@ exports.returnBook = async (req, res, next) => {
         },
         {
           where: {
-            id: bookId,
+            id: borrow.book_id,
           },
         }
       );
@@ -297,7 +303,7 @@ exports.returnBook = async (req, res, next) => {
     }
     res.status(200).json({
       message: "Book returned!",
-      result: result,
+      result: result[1],
     });
   } catch (error) {
     throwError(error, next);

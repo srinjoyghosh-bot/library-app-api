@@ -1,5 +1,6 @@
 const express = require("express");
 const studentController = require("../controller/student");
+const isAuth = require("../middleware/is_auth");
 const { body } = require("express-validator");
 const router = express.Router();
 
@@ -51,6 +52,19 @@ router.get(
   "/find",
   [body("id").trim().not().isEmpty().isDecimal()],
   studentController.findStudent
+);
+
+router.post(
+  "/borrow-request",
+  [
+    body("book_id").trim().notEmpty().withMessage("Provide valid book id"),
+    body("student_id")
+      .trim()
+      .notEmpty()
+      .withMessage("Provide proper student id"),
+  ],
+  isAuth,
+  studentController.borrowRequest
 );
 
 router.get(

@@ -1,4 +1,4 @@
-const {DataTypes} = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../util/database");
 
 const Borrow = sequelize.define(
@@ -15,7 +15,12 @@ const Borrow = sequelize.define(
       allowNull: false,
     },
     book_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "approved", "rejected"),
+      defaultValue: "pending",
       allowNull: false,
     },
     return_date: {
