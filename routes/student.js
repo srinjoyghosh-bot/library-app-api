@@ -69,9 +69,12 @@ router.post(
   studentController.borrowRequest
 );
 
+router.get("/profile", isAuth, studentController.getSelfProfile);
+
 router.get(
   "/history",
   // [body("id").trim().not().isEmpty().isDecimal()],
+  isAdmin,
   studentController.getBorrowHistory
 );
 

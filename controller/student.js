@@ -1,5 +1,5 @@
 const Student = require("../model/student");
-const Book = require("../model/book")
+const Book = require("../model/book");
 const Borrow = require("../model/borrow");
 const { validationResult } = require("express-validator");
 const differenceInDays = require("date-fns/differenceInDays");
@@ -27,13 +27,33 @@ const checkBodyData = (req, next) => {
   }
 };
 
+const getStudentBorrowHistory = async (student) => {
+  const history = await student.getBorrows();
+  let fine = 0;
+  history.forEach((borrow) => {
+    if (borrow.return_date) {
+      let diffInDays = differenceInDays(
+        new Date(borrow.return_date),
+        new Date(borrow.createdAt)
+      );
+      if (diffInDays > 7) {
+        fine += FINE_PER_DAY * (diffInDays - 7);
+      }
+    }
+  });
+  return {
+    fine: fine,
+    history: history,
+  };
+};
+
 exports.getAllStudents = async (req, res, next) => {
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
-  }  
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
   try {
     const students = await Student.findAll();
     return res.status(200).json({
@@ -46,12 +66,12 @@ exports.getAllStudents = async (req, res, next) => {
 
 exports.findStudent = async (req, res, next) => {
   checkBodyData(req, next);
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
-  }    
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
   try {
     const id = req.body.id;
     const student = await Student.findByPk(id);
@@ -137,19 +157,19 @@ exports.studentLogin = async (req, res, next) => {
       { expiresIn: "30d" }
     );
     res.status(200).json({
-      message:"Successfully logged in!",
-      token:token
-    })
+      message: "Successfully logged in!",
+      token: token,
+    });
   } catch (error) {
-    throwError(error,next)
+    throwError(error, next);
   }
 };
 
-exports.borrowRequest=async (req,res,next)=>{
+exports.borrowRequest = async (req, res, next) => {
   checkBodyData(req, next);
   try {
     const bookId = req.body.book_id;
-    const studentId = req.body.student_id;
+    const studentId = req.enrollment;
     const student = await Student.findByPk(studentId);
     const book = await Book.findByPk(bookId);
     if (!book) {
@@ -161,7 +181,7 @@ exports.borrowRequest=async (req,res,next)=>{
       return res.status(404).json({
         message: "Student not found!",
       });
-    }    
+    }
     if (!book.available) {
       return res.status(401).json({
         message: "Book not available",
@@ -195,7 +215,21 @@ exports.borrowRequest=async (req,res,next)=>{
   } catch (error) {
     throwError(error, next);
   }
-}
+};
+
+exports.getSelfProfile = async (req, res, next) => {
+  const enrollment = req.enrollment;
+  try {
+    const student = await Student.findByPk(enrollment);
+    const result = await getStudentBorrowHistory(student);
+    return res.status(200).json({
+      student: student,
+      borrow: result,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
+};
 
 exports.getBorrowHistory = async (req, res, next) => {
   // checkBodyData(req, next);
@@ -205,6 +239,12 @@ exports.getBorrowHistory = async (req, res, next) => {
       message: "please provide an id",
     });
   }
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
   try {
     const student = await Student.findByPk(studentId);
     if (!student) {
@@ -212,23 +252,21 @@ exports.getBorrowHistory = async (req, res, next) => {
         message: "Student not found",
       });
     }
-    const history = await student.getBorrows();
-    let fine = 0;
-    history.forEach((borrow) => {
-      if (borrow.return_date) {
-        let diffInDays = differenceInDays(
-          new Date(borrow.return_date),
-          new Date(borrow.createdAt)
-        );
-        if (diffInDays > 7) {
-          fine += FINE_PER_DAY * (diffInDays - 7);
-        }
-      }
-    });
-    res.status(200).json({
-      fine: fine,
-      history: history,
-    });
+    // const history = await student.getBorrows();
+    // let fine = 0;
+    // history.forEach((borrow) => {
+    //   if (borrow.return_date) {
+    //     let diffInDays = differenceInDays(
+    //       new Date(borrow.return_date),
+    //       new Date(borrow.createdAt)
+    //     );
+    //     if (diffInDays > 7) {
+    //       fine += FINE_PER_DAY * (diffInDays - 7);
+    //     }
+    //   }
+    // });
+    const result=await getStudentBorrowHistory(student)
+    res.status(200).json(result);
   } catch (error) {
     throwError(error, next);
   }
