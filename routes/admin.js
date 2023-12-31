@@ -35,6 +35,8 @@ router.post(
         min: 8,
       }).withMessage("Password must be 8 characters long"),
     ],
-    isAdmin,
+    // isAdmin,
     adminController.adminLogin
   );
+
+  module.exports=router

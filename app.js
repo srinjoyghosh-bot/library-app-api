@@ -5,6 +5,7 @@ const Student = require("./model/student");
 const Borrow = require("./model/borrow");
 const studentRoutes = require("./routes/student");
 const bookRoutes = require("./routes/book");
+const adminRoutes=require("./routes/admin")
 const dotenv=require("dotenv")
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 
 app.use("/student", studentRoutes);
 app.use("/book", bookRoutes);
+app.use("/admin",adminRoutes)
 
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
