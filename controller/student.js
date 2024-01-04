@@ -134,8 +134,8 @@ exports.addStudent = async (req, res, next) => {
 exports.studentLogin = async (req, res, next) => {
   checkBodyData(req, next);
   try {
-    const { enrollment, password } = req.body;
-    const student = await Student.findByPk(enrollment);
+    const { id, password } = req.body;
+    const student = await Student.findByPk(id);
     if (!student) {
       return res.status(404).json({
         message: "Student not found!",

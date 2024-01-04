@@ -31,7 +31,7 @@ router.post(
 router.post(
   "/login",
   [
-    body("enrollment")
+    body("id")
       .trim()
       .isNumeric()
       .withMessage("Enrollment must be numeric")
