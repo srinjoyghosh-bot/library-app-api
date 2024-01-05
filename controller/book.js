@@ -25,7 +25,7 @@ const checkBodyData = (req, next) => {
 };
 
 const generateId = () => {
-  return generateUniqueId({ length: 6, includeSymbols: false });
+  return generateUniqueId({ length: 6 });
 };
 
 exports.findAllBooks = async (req, res, next) => {
@@ -95,7 +95,7 @@ exports.addBook = async (req, res, next) => {
     const publisher = req.body.publisher;
     const author = req.body.author;
     const imageUrl = req.body.image;
-    const id = generateId();
+    const id = generateId();    
     const book = await Book.create({
       id: id,
       name: name,

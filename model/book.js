@@ -6,6 +6,7 @@ const Book = sequelize.define("book", {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
+    
   },
   name: DataTypes.STRING,
   description: DataTypes.STRING,
