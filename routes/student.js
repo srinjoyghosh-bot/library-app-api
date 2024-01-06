@@ -59,11 +59,7 @@ router.get(
 router.post(
   "/borrow-request",
   [
-    body("book_id").trim().notEmpty().withMessage("Provide valid book id"),
-    body("student_id")
-      .trim()
-      .notEmpty()
-      .withMessage("Provide proper student id"),
+    body("book_id").trim().notEmpty().withMessage("Provide valid book id")    
   ],
   isAuth,
   studentController.borrowRequest
@@ -78,4 +74,4 @@ router.get(
   studentController.getBorrowHistory
 );
 
-module.exports = router;
+module.exports = router;  
