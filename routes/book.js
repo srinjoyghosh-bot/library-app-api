@@ -38,7 +38,6 @@ router.put(
 router.get("/", bookController.findAllBooks);
 router.get(
   "/find",
-  [body("id").trim().not().isEmpty().isDecimal()],
   bookController.findBook
 );
 router.get("/find-by-name", bookController.findBookByName);
