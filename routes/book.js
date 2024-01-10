@@ -17,6 +17,19 @@ router.post(
   bookController.addBook
 );
 
+router.put(
+  "/edit",
+  [
+    body("id").trim().not().isEmpty(),
+    body("name").trim().not().isEmpty(),
+    body("description").trim().not().isEmpty(),
+    body("publisher").trim().not().isEmpty(),
+    body("author").trim().not().isEmpty(),
+  ],
+  isAdmin,
+  bookController.editBook
+);
+
 router.post(
   "/issue",
   [
@@ -36,10 +49,7 @@ router.put(
   bookController.returnBook
 );
 router.get("/", bookController.findAllBooks);
-router.get(
-  "/find",
-  bookController.findBook
-);
+router.get("/find", bookController.findBook);
 router.get("/find-by-name", bookController.findBookByName);
 router.delete("/delete", isAdmin, bookController.deleteBook);
 router.put("/toggle-availability", isAdmin, bookController.toggleAvailability);

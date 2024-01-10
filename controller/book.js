@@ -81,11 +81,11 @@ exports.findBookByName = async (req, res, next) => {
 
 exports.addBook = async (req, res, next) => {
   checkBodyData(req, next);
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
   }
   try {
     const name = req.body.name;
@@ -93,7 +93,7 @@ exports.addBook = async (req, res, next) => {
     const publisher = req.body.publisher;
     const author = req.body.author;
     const imageUrl = req.body.image;
-    const id = generateId();    
+    const id = generateId();
     const book = await Book.create({
       id: id,
       name: name,
@@ -105,6 +105,39 @@ exports.addBook = async (req, res, next) => {
     });
     res.status(200).json({
       message: "Book added !",
+      book: book,
+    });
+  } catch (error) {
+    console.log(error);
+    throwError(error, next);
+  }
+};
+
+exports.editBook = async (req, res, next) => {
+  checkBodyData(req, next);
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
+  try {
+    const { id, name, description, author, publisher } = req.body;
+    const book = await Book.findByPk(id);
+    if (!book) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Book not found",
+      });
+    }
+    book.name = name || book.name;
+    book.author = author || book.author;
+    book.description = description || book.description;
+    book.publisher = publisher || book.publisher;
+    const result = await book.save();
+    console.log(result);
+    return res.status(200).json({
+      message: "Book updated!",
       book: book,
     });
   } catch (error) {
@@ -121,11 +154,11 @@ exports.deleteBook = async (req, res, next) => {
     });
   }
 
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
   }
 
   try {
@@ -150,16 +183,20 @@ exports.deleteBook = async (req, res, next) => {
 
 exports.issueBook = async (req, res, next) => {
   checkBodyData(req, next);
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
   }
   try {
     const borrowId = req.body.borrowId;
     const borrowRequest = await Borrow.findByPk(borrowId);
-    if (!borrowRequest || borrowRequest.return_date !== null || borrowRequest.status!="pending") {
+    if (
+      !borrowRequest ||
+      borrowRequest.return_date !== null ||
+      borrowRequest.status != "pending"
+    ) {
       return res.status(401).json({
         message: "Book was not available for issue",
       });
@@ -208,16 +245,20 @@ exports.issueBook = async (req, res, next) => {
 
 exports.rejectBookIssue = async (req, res, next) => {
   checkBodyData(req, next);
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
   }
   try {
     const borrowId = req.body.borrowId;
     const borrowRequest = await Borrow.findByPk(borrowId);
-    if (!borrowRequest || borrowRequest.return_date !== null || borrowRequest.status!="pending") {
+    if (
+      !borrowRequest ||
+      borrowRequest.return_date !== null ||
+      borrowRequest.status != "pending"
+    ) {
       return res.status(401).json({
         message: "Book was not available for issue",
       });
@@ -253,11 +294,11 @@ exports.toggleAvailability = async (req, res, next) => {
       message: "Please provide a book id",
     });
   }
-  if(!req.isAdmin){
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
   }
   try {
     const book = await Book.findByPk(id);
@@ -278,19 +319,19 @@ exports.toggleAvailability = async (req, res, next) => {
 };
 
 exports.returnBook = async (req, res, next) => {
-  checkBodyData(req, next);  
-  if(!req.isAdmin){
+  checkBodyData(req, next);
+  if (!req.isAdmin) {
     return res.status(401).json({
-      error:"Unauthenticated",
-      message:"Only admin can perform this action"
-    })
-  }  
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
   try {
     const borrowId = req.body.borrowId;
     const date = new Date();
-    const borrow = await Borrow.findByPk(borrowId);    
-    
-    if (!borrow || borrow.return_date !== null || borrow.status!="approved") {
+    const borrow = await Borrow.findByPk(borrowId);
+
+    if (!borrow || borrow.return_date !== null || borrow.status != "approved") {
       return res.status(401).json({
         message: "Book was not available for issue",
       });
@@ -317,7 +358,7 @@ exports.returnBook = async (req, res, next) => {
       },
       {
         where: {
-          id:borrowId
+          id: borrowId,
         },
         order: [["id", "DESC"]],
       }

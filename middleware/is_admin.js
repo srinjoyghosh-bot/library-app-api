@@ -11,10 +11,13 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, "mysecretsecret");
   } catch (err) {
+    // console.log("error yha h 500");
     err.statusCode = 500;
     throw err;
   }
+  // console.log(decodedToken);
   if (!decodedToken || !decodedToken.email) {
+    // console.log("error yha h 401");
     const error = new Error("Not authenticated");
     err.statusCode = 401;
     throw error;
