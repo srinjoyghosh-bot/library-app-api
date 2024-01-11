@@ -30,15 +30,9 @@ router.put(
   bookController.editBook
 );
 
-router.post(
-  "/issue",
-  [
-    body("student_id").trim().not().isEmpty().isDecimal(),
-    body("book_id").trim().not().isEmpty().isDecimal(),
-  ],
-  isAdmin,
-  bookController.issueBook
-);
+router.put("/issue", isAdmin, bookController.issueBook);
+router.put("/reject-issue", isAdmin, bookController.rejectBookIssue);
+
 router.put(
   "/return",
   [

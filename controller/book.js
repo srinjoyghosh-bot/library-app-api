@@ -182,7 +182,7 @@ exports.deleteBook = async (req, res, next) => {
 };
 
 exports.issueBook = async (req, res, next) => {
-  checkBodyData(req, next);
+  //checkBodyData(req, next);
   if (!req.isAdmin) {
     return res.status(401).json({
       error: "Unauthenticated",
@@ -190,8 +190,9 @@ exports.issueBook = async (req, res, next) => {
     });
   }
   try {
-    const borrowId = req.body.borrowId;
+    const borrowId = req.query.id;
     const borrowRequest = await Borrow.findByPk(borrowId);
+    console.log(borrowRequest);
     if (
       !borrowRequest ||
       borrowRequest.return_date !== null ||
@@ -201,7 +202,7 @@ exports.issueBook = async (req, res, next) => {
         message: "Book was not available for issue",
       });
     }
-    const result = await Book.update(
+    let result = await Book.update(
       {
         available: false,
       },
@@ -252,7 +253,7 @@ exports.rejectBookIssue = async (req, res, next) => {
     });
   }
   try {
-    const borrowId = req.body.borrowId;
+    const borrowId = req.query.id;
     const borrowRequest = await Borrow.findByPk(borrowId);
     if (
       !borrowRequest ||
