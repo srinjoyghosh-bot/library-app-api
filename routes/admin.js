@@ -13,30 +13,38 @@ router.post(
       .notEmpty()
       .isEmail()
       .withMessage("Must be a valid email id"),
-    body("password").trim().isLength({
-      max: 8,
-      min: 8,
-    }).withMessage("Password must be 8 characters long"),
+    body("password")
+      .trim()
+      .isLength({
+        max: 8,
+        min: 8,
+      })
+      .withMessage("Password must be 8 characters long"),
   ],
   isAdmin,
   adminController.addAdmin
 );
 
 router.post(
-    "/login",
-    [
-      body("email")
-        .trim()
-        .notEmpty()
-        .isEmail()
-        .withMessage("Must be a valid email id"),
-      body("password").trim().isLength({
+  "/login",
+  [
+    body("email")
+      .trim()
+      .notEmpty()
+      .isEmail()
+      .withMessage("Must be a valid email id"),
+    body("password")
+      .trim()
+      .isLength({
         max: 8,
         min: 8,
-      }).withMessage("Password must be 8 characters long"),
-    ],
-    // isAdmin,
-    adminController.adminLogin
-  );
+      })
+      .withMessage("Password must be 8 characters long"),
+  ],
+  // isAdmin,
+  adminController.adminLogin
+);
 
-  module.exports=router
+router.get("/request", isAdmin, adminController.getRequests);
+
+module.exports = router;

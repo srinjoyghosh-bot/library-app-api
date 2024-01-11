@@ -1,5 +1,6 @@
 const { validationResult, check } = require("express-validator");
 const Admin = require("../model/admin.js");
+const Borrow = require("../model/borrow.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -79,7 +80,30 @@ exports.adminLogin = async (req, res, next) => {
     { expiresIn: "30d" }
   );
   return res.status(200).json({
-    message:"Admin logged in!",
-    token:token,
-  })
+    message: "Admin logged in!",
+    token: token,
+  });
+};
+
+exports.getRequests = async (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
+
+  try {
+    const requests = await Borrow.findAll({
+      where: {
+        status: "pending",
+      },
+    });
+
+    return res.status(200).json({
+      requests: requests,
+    });
+  } catch (error) {
+    throwError(error, next);
+  }
 };
