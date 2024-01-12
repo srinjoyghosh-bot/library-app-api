@@ -20,11 +20,7 @@ router.post(
 router.put(
   "/edit",
   [
-    body("id").trim().not().isEmpty(),
-    body("name").trim().not().isEmpty(),
-    body("description").trim().not().isEmpty(),
-    body("publisher").trim().not().isEmpty(),
-    body("author").trim().not().isEmpty(),
+    body("id").trim().not().isEmpty()    
   ],
   isAdmin,
   bookController.editBook

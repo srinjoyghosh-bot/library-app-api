@@ -6,7 +6,7 @@ const differenceInDays = require("date-fns/differenceInDays");
 const { fi } = require("date-fns/locale");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const {studentIndex} = require("../util/algolia");
+const { studentIndex } = require("../util/algolia");
 
 const FINE_PER_DAY = 10;
 const SALT_ROUNDS = 12;
@@ -98,14 +98,14 @@ exports.search = async (req, res, next) => {
     });
   }
   try {
-    const term=req.params.term
-    const search=await studentIndex.search(term)
+    const term = req.params.term;
+    const search = await studentIndex.search(term);
     return res.status(200).json({
-      students:search.hits
-    })
+      students: search.hits,
+    });
   } catch (error) {
     console.log(error);
-    throwError(error,next)
+    throwError(error, next);
   }
 };
 
@@ -118,17 +118,16 @@ exports.addAllStudentsToAlgolia = async (req, res, next) => {
   }
   try {
     const students = await Student.findAll();
-    let updatedStudents=students.map((student) => {
-      return {...student.dataValues,objectID:student.enrollment_id}
+    let updatedStudents = students.map((student) => {
+      return { ...student.dataValues, objectID: student.enrollment_id };
     });
     console.log(updatedStudents);
-    await studentIndex.saveObjects(updatedStudents)
-    return res.sendStatus(200)
+    await studentIndex.saveObjects(updatedStudents);
+    return res.sendStatus(200);
   } catch (error) {
     console.log(error);
-    throwError(error,next)
+    throwError(error, next);
   }
-  
 };
 
 exports.addStudent = async (req, res, next) => {
@@ -156,11 +155,17 @@ exports.addStudent = async (req, res, next) => {
       },
     });
     if (created) {
-      return res.status(200).json({
+      res.status(200).json({
         message: "Student created",
         created: true,
         student: student,
       });
+      const newStudent = {
+        ...student.dataValues,
+        objectID: student.enrollment_id,
+      };
+      await studentIndex.saveObject(newStudent);
+      return;
     }
     res.status(409).json({
       error: "Conflict",

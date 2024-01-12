@@ -108,6 +108,9 @@ exports.addBook = async (req, res, next) => {
       message: "Book added !",
       book: book,
     });
+    const newBook={...book.dataValues,objectID:book.id}
+    await booksIndex.saveObject(newBook)
+    return ;
   } catch (error) {
     console.log(error);
     throwError(error, next);
@@ -137,11 +140,14 @@ exports.editBook = async (req, res, next) => {
     book.publisher = publisher || book.publisher;
     const result = await book.save();
     console.log(result);
-    return res.status(200).json({
+    res.status(200).json({
       message: "Book updated!",
       book: book,
     });
+    await booksIndex.saveObject({...book.dataValues,objectID:book.id})
+    return ;
   } catch (error) {
+    console.log(error);
     throwError(error, next);
   }
 };
@@ -169,9 +175,11 @@ exports.deleteBook = async (req, res, next) => {
       },
     });
     if (rowsDeleted === 1) {
-      return res.status(200).json({
+      res.status(200).json({
         message: "Book deleted!",
       });
+      await booksIndex.deleteObject(id)
+      return ;
     } else {
       return res.status(404).json({
         message: "No book found!",
