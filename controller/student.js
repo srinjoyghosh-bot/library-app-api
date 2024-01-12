@@ -110,6 +110,12 @@ exports.search = async (req, res, next) => {
 };
 
 exports.addAllStudentsToAlgolia = async (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
   try {
     const students = await Student.findAll();
     let updatedStudents=students.map((student) => {

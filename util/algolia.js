@@ -7,8 +7,10 @@ const SEARCH_KEY="3a5ff27f2ea17e3bc89a68dde4498a97"
 const client = algoliaSearch.default(APP_ID,ADMIN_KEY)
 
 const studentIndex=client.initIndex("dev_LIB_STUDENTS")
+const booksIndex=client.initIndex("dev_LIB_BOOKS")
 
 module.exports= {
     client,
-    studentIndex
+    studentIndex,
+    booksIndex
 }

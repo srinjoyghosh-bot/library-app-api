@@ -46,5 +46,11 @@ router.get("/", bookController.findAllBooks);
 router.get("/find", bookController.findBook);
 router.get("/find-by-name", bookController.findBookByName);
 router.delete("/delete", isAdmin, bookController.deleteBook);
+router.post(
+  "/add-books-to-algolia",
+  isAdmin,
+  bookController.addAllBooksToAlgolia
+);
+router.get("/search/:term", bookController.search);
 router.put("/toggle-availability", isAdmin, bookController.toggleAvailability);
 module.exports = router;

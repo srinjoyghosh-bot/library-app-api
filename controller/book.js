@@ -4,6 +4,7 @@ const Borrow = require("../model/borrow");
 const Student = require("../model/student");
 const { validationResult } = require("express-validator");
 const { Op } = require("sequelize");
+const { booksIndex } = require("../util/algolia");
 
 // const Op = Sequelize.Op;
 
@@ -177,6 +178,39 @@ exports.deleteBook = async (req, res, next) => {
       });
     }
   } catch (error) {
+    throwError(error, next);
+  }
+};
+
+exports.addAllBooksToAlgolia = async (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
+  try {
+    const books = await Book.findAll();
+    const newBooks = books.map((book) => {
+      return { ...book.dataValues, objectID: book.id };
+    });
+    await booksIndex.saveObjects(newBooks);
+    return res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    throwError(error, next);
+  }
+};
+
+exports.search = async (req, res, next) => {
+  try {
+    const term = req.params.term;
+    const result = await booksIndex.search(term);
+    return res.status(200).json({
+      books: result.hits,
+    });
+  } catch (error) {
+    console.log(error);
     throwError(error, next);
   }
 };
