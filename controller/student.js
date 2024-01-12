@@ -6,6 +6,7 @@ const differenceInDays = require("date-fns/differenceInDays");
 const { fi } = require("date-fns/locale");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {studentIndex} = require("../util/algolia");
 
 const FINE_PER_DAY = 10;
 const SALT_ROUNDS = 12;
@@ -87,6 +88,41 @@ exports.findStudent = async (req, res, next) => {
   } catch (error) {
     throwError(error, next);
   }
+};
+
+exports.search = async (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
+  try {
+    const term=req.params.term
+    const search=await studentIndex.search(term)
+    return res.status(200).json({
+      students:search.hits
+    })
+  } catch (error) {
+    console.log(error);
+    throwError(error,next)
+  }
+};
+
+exports.addAllStudentsToAlgolia = async (req, res, next) => {
+  try {
+    const students = await Student.findAll();
+    let updatedStudents=students.map((student) => {
+      return {...student.dataValues,objectID:student.enrollment_id}
+    });
+    console.log(updatedStudents);
+    await studentIndex.saveObjects(updatedStudents)
+    return res.sendStatus(200)
+  } catch (error) {
+    console.log(error);
+    throwError(error,next)
+  }
+  
 };
 
 exports.addStudent = async (req, res, next) => {
@@ -265,7 +301,7 @@ exports.getBorrowHistory = async (req, res, next) => {
     //     }
     //   }
     // });
-    const result=await getStudentBorrowHistory(student)
+    const result = await getStudentBorrowHistory(student);
     res.status(200).json(result);
   } catch (error) {
     throwError(error, next);
