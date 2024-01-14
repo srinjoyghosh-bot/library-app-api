@@ -386,9 +386,16 @@ exports.returnBook = async (req, res, next) => {
     });
   }
   try {
-    const borrowId = req.body.borrowId;
+    const {book_id,student_id}=req.body
+    // const borrowId = req.body.borrowId;
     const date = new Date();
-    const borrow = await Borrow.findByPk(borrowId);
+    // const borrow = await Borrow.findByPk(borrowId);
+    const borrow=await Borrow.findOne({
+      where:{
+        book_id:book_id,
+        student_id:student_id
+      }
+    })
 
     if (!borrow || borrow.return_date !== null || borrow.status != "approved") {
       return res.status(401).json({
@@ -396,13 +403,15 @@ exports.returnBook = async (req, res, next) => {
       });
     }
 
+    const borrowId=borrow.id
+
     const bookUpdate = await Book.update(
       {
         available: true,
       },
       {
         where: {
-          id: borrow.book_id,
+          id: book_id,
         },
       }
     );
@@ -429,7 +438,7 @@ exports.returnBook = async (req, res, next) => {
         },
         {
           where: {
-            id: borrow.book_id,
+            id: book_id,
           },
         }
       );
@@ -437,7 +446,7 @@ exports.returnBook = async (req, res, next) => {
         message: "Book return failed!",
       });
     }
-    res.status(200).json({
+    return res.status(200).json({
       message: "Book returned!",
       result: result[1],
     });

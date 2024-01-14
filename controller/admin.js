@@ -39,8 +39,7 @@ exports.addAdmin = async (req, res, next) => {
     if (!created) {
       return res.status(409).json({
         error: "Conflict",
-        message: "Email is already an admin",
-        admin: admin,
+        message: "Email is already an admin",        
       });
     }
     return res.status(200).json({

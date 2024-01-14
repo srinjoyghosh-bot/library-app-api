@@ -32,8 +32,8 @@ router.put("/reject-issue", isAdmin, bookController.rejectBookIssue);
 router.put(
   "/return",
   [
-    body("student_id").trim().not().isEmpty().isDecimal(),
-    body("book_id").trim().not().isEmpty().isDecimal(),
+    body("student_id").trim().not().isEmpty(),
+    body("book_id").trim().not().isEmpty(),
   ],
   isAdmin,
   bookController.returnBook
