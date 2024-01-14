@@ -266,6 +266,7 @@ exports.borrowRequest = async (req, res, next) => {
 
 exports.getSelfProfile = async (req, res, next) => {
   const enrollment = req.enrollment;
+
   try {
     const student = await Student.findByPk(enrollment);
     const result = await getStudentBorrowHistory(student);
@@ -274,6 +275,34 @@ exports.getSelfProfile = async (req, res, next) => {
       borrow: result,
     });
   } catch (error) {
+    console.log(error);
+    throwError(error, next);
+  }
+};
+
+exports.getProfile = async (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: "Only admin can perform this action",
+    });
+  }
+  const enrollment = req.params.id;  
+  if (!enrollment) {
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "Give proper student id",
+    });
+  }
+  try {
+    const student = await Student.findByPk(enrollment);
+    const result = await getStudentBorrowHistory(student);
+    return res.status(200).json({
+      student: student,
+      borrow: result,
+    });
+  } catch (error) {
+    console.log(error);
     throwError(error, next);
   }
 };

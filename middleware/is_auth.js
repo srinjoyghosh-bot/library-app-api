@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
   }
   if (!decodedToken || !decodedToken.enrollment) {
     const error = new Error("Not authenticated");
-    err.statusCode = 401;
+    error.statusCode = 401;
     throw error;
   }  
   req.enrollment = decodedToken.enrollment; 

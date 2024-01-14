@@ -64,6 +64,7 @@ router.post(
 );
 
 router.get("/profile", isAuth, studentController.getSelfProfile);
+router.get("/profile/:id",isAdmin, studentController.getProfile);
 
 router.get(
   "/history",
@@ -72,7 +73,11 @@ router.get(
   studentController.getBorrowHistory
 );
 
-router.post("/add-to-algolia",isAdmin, studentController.addAllStudentsToAlgolia);
+router.post(
+  "/add-to-algolia",
+  isAdmin,
+  studentController.addAllStudentsToAlgolia
+);
 router.get("/search/:term", isAdmin, studentController.search);
 
 module.exports = router;
