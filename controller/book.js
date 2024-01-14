@@ -306,13 +306,29 @@ exports.rejectBookIssue = async (req, res, next) => {
         message: "Book was not available for issue",
       });
     }
-    const result = await Borrow.update(
+    let result = await Borrow.update(
       {
         status: "rejected",
       },
       {
         where: {
           id: borrowId,
+        },
+      }
+    );
+    if (result[0] !== 1) {
+      return res.status(401).json({
+        message: "Book issue rejection failed!",
+        result: result,
+      });
+    }
+    result = await Book.update(
+      {
+        available: true,
+      },
+      {
+        where: {
+          id: borrowRequest.book_id,
         },
       }
     );
