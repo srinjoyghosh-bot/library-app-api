@@ -21,9 +21,9 @@ router.post(
         min: 8,
       })
       .withMessage("Password must be at least 8 characters"),
-    body("branch").trim().not().isEmpty(),
-    body("degree").trim().not().isEmpty(),
-    body("year").trim().not().isEmpty().isDecimal(),
+    // body("branch").trim().not().isEmpty(),
+    // body("degree").trim().not().isEmpty(),
+    // body("year").trim().not().isEmpty().isDecimal(),
   ],
   studentController.addStudent
 );
