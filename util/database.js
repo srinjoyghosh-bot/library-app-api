@@ -13,16 +13,15 @@ require("dotenv").config();
 // const sequelize = new Sequelize("sql11672947", "sql11672947", "Q9Ct3J6FAu", {
 //   dialect: "mysql",
 //   host: "sql11.freemysqlhosting.net",
-
 // });
 const sequelize = new Sequelize(
-  "defaultdb",
-  "avnadmin",
-  "AVNS_xVIdckNs3OJFNcL6QEq",
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
     dialect: "mysql",
-    host: "lib-2c3c758-srinjoygh-7d67.a.aivencloud.com",
-    port:26514,
+    host: process.env.DB_HOST,
+    port:process.env.DB_PORT,
   }
 );
 // require('dotenv').config()

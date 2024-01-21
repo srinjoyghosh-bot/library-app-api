@@ -3,7 +3,7 @@ const Admin = require("../model/admin.js");
 const Borrow = require("../model/borrow.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config()
 const SALT_ROUNDS = 12;
 
 const throwError = (err, next) => {
@@ -71,11 +71,12 @@ exports.adminLogin = async (req, res, next) => {
       message: "The provided password is incorrect. Access is denied.",
     });
   }
+  console.log(process.env.JWT_SECRET_KEY);
   const token = jwt.sign(
     {
       email: admin.email,
     },
-    "mysecretsecret",
+    process.env.JWT_SECRET_KEY,
     { expiresIn: "30d" }
   );
   return res.status(200).json({

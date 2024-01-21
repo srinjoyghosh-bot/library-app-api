@@ -45,7 +45,7 @@ Borrow.belongsTo(Student);
 
 sequelize
   .sync()
-  .then((result) => {
+  .then((result) => {    
     app.listen(process.env.PORT || 8080);
   })
   .catch((error) => {

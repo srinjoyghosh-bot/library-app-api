@@ -7,7 +7,7 @@ const { fi } = require("date-fns/locale");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { studentIndex } = require("../util/algolia");
-
+require("dotenv").config()
 const FINE_PER_DAY = 10;
 const SALT_ROUNDS = 12;
 
@@ -200,7 +200,7 @@ exports.studentLogin = async (req, res, next) => {
       {
         enrollment: student.enrollment_id,
       },
-      "mysecretsecret",
+      process.env.JWT_SECRET_KEY,
       { expiresIn: "30d" }
     );
     res.status(200).json({
